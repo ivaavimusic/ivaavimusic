@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audio Transcription</title>
+<script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+<style>
+  body {
+    margin: 0;
+    font-family: "League Spartan", sans-serif;
+    transition: background-color 0.5s, color 0.5s;
+  }
+  #container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: black;
+    color: white;
+    position: relative;
+    transition: background-color 0.5s;
+  }
+  #header {
+    margin-top: 100px;
+    font-size: 36px;
+    font-weight: bold;
+  }
+  #upload-container {
+    border: 2px dashed #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    background-color: #1a1a1a;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  #uploaded-file {
+    font-weight: bold;
+    margin-top: 20px;
+    color: #000000;
+  }
+  #transcribe-button {
+    background-color: #c1ff72;
+    color: #000000;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  #toggle-mode {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: transparent;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    padding: 5px;
+    cursor: pointer;
+  }
+  #connect-wallet {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background-color: transparent;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  #connect-wallet:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  .connected {
+    background-color: #43c984 !important;
+    cursor: default;
+  }
+  .night-mode #container {
+    background-color: white;
+    color: black;
+  }
+  .night-mode #upload-container {
+    background-color: white;
+  }
+  .night-mode #uploaded-file {
+    color: black;
+  }
+  .night-mode #transcribe-button {
+    background-color: #c1ff72;
+    color: #000000;
+  }
+  .night-mode #toggle-mode {
+    background-color: #c1ff72;
+    border-color: #c1ff72;
+  }
+  .night-mode #connect-wallet {
+    background-color: transparent;
+    color: black;
+    border-color: black;
+  }
+  footer {
+    margin-top: 20px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+  }
+</style>
+</head>
+<body>
+  <div id="container">
+    <button id="toggle-mode"> 🌞/🌙 </button>
+    <h1 id="header">Audio Transcription</h1>
+    <div id="upload-container">
+      <label for="audio-file">Choose an audio file:</label>
+      <input type="file" id="audio-file" accept=".wav, .flac">
+      <div id="uploaded-file"></div>
+      <button id="transcribe-button">Transcribe</button>
+    </div>
+    <footer>
+      Made with ❤️ by ivaavi.eth
+    </footer>
+    <button id="connect-wallet">Connect Wallet</button>
+  </div>
+  <script>
+    const container = document.getElementById("container");
+    const toggleModeButton = document.getElementById("toggle-mode");
+    const connectButton = document.getElementById("connect-wallet");
+    let walletConnected = false;
+
+    toggleModeButton.addEventListener("click", () => {
+      container.classList.toggle("night-mode");
+      document.body.classList.toggle("night-mode");
+    });
+
+    const audioFileInput = document.getElementById("audio-file");
+
+    audioFileInput.addEventListener("change", () => {
+      const uploadedFile = document.getElementById("uploaded-file");
+      const file = audioFileInput.files[0];
+      if (file) {
+        uploadedFile.textContent = `Uploaded File:\n${file.name}`;
+      } else {
+        uploadedFile.textContent = "";
+      }
+    });
+
+    // Web3.js code
+    if (typeof web3 !== "undefined") {
+      web3 = new Web3(web3.currentProvider);
+    } else {
+      console.log("No web3 provider detected. Please install MetaMask.");
+    }
+
+    async function connectWallet() {
+      try {
+        const accounts = await web3.eth.requestAccounts();
+        console.log("Connected wallet:", accounts[0]);
+        walletConnected = true;
+        updateConnectButton();
+      } catch (error) {
+        console.error("Error connecting wallet:", error);
+      }
+    }
+
+    function updateConnectButton() {
+      if (walletConnected) {
+        connectButton.textContent = "Connected: " + web3.eth.defaultAccount;
+        connectButton.classList.add("connected");
+        connectButton.removeEventListener("click", connectWallet);
+        connectButton.style.cursor = "default";
+      } else {
+        connectButton.textContent = "Connect Wallet";
+        connectButton.classList.remove("connected");
+        connectButton.addEventListener("click", connectWallet);
+        connectButton.style.cursor = "pointer";
+      }
+    }
+
+    connectButton.addEventListener("click", connectWallet);
+    updateConnectButton();
+  </script>
+</body>
+</html>
